@@ -54,6 +54,13 @@ body {
     font-family:inherit;
 }
 .view-btn.active { background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+.refresh-btn {
+    padding:6px 14px; border:2px solid var(--primary); border-radius:10px;
+    background:transparent; color:var(--secondary); font-size:0.9rem;
+    cursor:pointer; transition:all 0.3s; font-family:inherit;
+}
+.refresh-btn:hover { background:var(--primary-light); }
+.refresh-btn:active { transform:scale(0.95); }
 
 /* Date section */
 .date-section { margin-top:24px; }
@@ -162,9 +169,12 @@ body {
             <button class="filter-tab" data-filter="历史故事">历史故事</button>
             <button class="filter-tab" data-filter="名人传记">名人传记</button>
         </div>
+        <div style="display:flex;gap:8px;align-items:center;">
         <div class="view-toggle">
             <button class="view-btn active" data-view="grid" title="图标视图">⊞</button>
             <button class="view-btn" data-view="list" title="列表视图">☰</button>
+        </div>
+        <button class="refresh-btn" onclick="location.reload()" title="刷新">🔄 刷新</button>
         </div>
     </div>
     <div id="storiesContainer" class="rb"></div>
