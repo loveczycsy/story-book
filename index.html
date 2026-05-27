@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>历史绘本故事集</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -18,26 +21,27 @@ body {
 .container {
   text-align: center;
   padding: 2rem;
+  max-width: 400px;
 }
 h1 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
   background: linear-gradient(90deg, #e94560, #f5a623);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+.subtitle { color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 1.5rem; }
 .spinner {
-  width: 40px; height: 40px;
-  border: 4px solid rgba(255,255,255,0.2);
+  width: 36px; height: 36px;
+  border: 3px solid rgba(255,255,255,0.15);
   border-top-color: #e94560;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin: 1.5rem auto;
+  margin: 0 auto 1rem;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-p { color: rgba(255,255,255,0.7); font-size: 0.95rem; }
-.error { color: #e94560; }
-.manual-link {
+p { color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.6; }
+.btn {
   display: inline-block;
   margin-top: 1rem;
   padding: 0.6rem 1.5rem;
@@ -45,70 +49,85 @@ p { color: rgba(255,255,255,0.7); font-size: 0.95rem; }
   color: #fff;
   border-radius: 8px;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
 }
-.manual-link:hover { background: #d63851; }
+.btn:hover { background: #d63851; }
+.btn + .btn { margin-left: 0.5rem; background: rgba(255,255,255,0.15); }
+.btn + .btn:hover { background: rgba(255,255,255,0.25); }
+.hidden { display: none; }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>📖 历史绘本故事集</h1>
-  <div class="spinner"></div>
+  <p class="subtitle">为好奇的小朋友准备的故事</p>
+  <div class="spinner" id="spinner"></div>
   <p id="status">正在连接故事服务器...</p>
-  <div id="errorBox" style="display:none;margin-top:1rem;">
-    <p class="error" id="errorMsg"></p>
-    <a class="manual-link" id="manualLink" href="#" style="display:none;">点击直接访问</a>
+  <div id="actions" class="hidden">
+    <a class="btn" id="mainLink" href="#">📖 阅读故事</a>
+    <button class="btn" id="retryBtn" onclick="location.reload()">🔄 刷新</button>
   </div>
 </div>
 <script>
 (function() {
+  var spinner = document.getElementById('spinner');
   var statusEl = document.getElementById('status');
-  var errorBox = document.getElementById('errorBox');
-  var errorMsg = document.getElementById('errorMsg');
-  var manualLink = document.getElementById('manualLink');
+  var actions = document.getElementById('actions');
+  var mainLink = document.getElementById('mainLink');
+  var tunnelUrl = null;
 
-  function showError(msg, url) {
-    statusEl.textContent = '';
-    document.querySelector('.spinner').style.display = 'none';
-    errorMsg.textContent = msg;
-    errorBox.style.display = 'block';
-    if (url) {
-      manualLink.href = url;
-      manualLink.style.display = 'inline-block';
-    }
+  function showReady(url) {
+    spinner.style.display = 'none';
+    statusEl.textContent = '故事服务器已就绪！';
+    mainLink.href = url;
+    actions.classList.remove('hidden');
+    // Auto redirect after 1.5s
+    setTimeout(function() {
+      window.location.href = url;
+    }, 1500);
   }
 
-  // Try to fetch tunnel URL
-  fetch('tunnel_url.txt?t=' + Date.now(), { cache: 'no-store' })
+  function showError(msg, url) {
+    spinner.style.display = 'none';
+    statusEl.textContent = msg || '连接失败，请稍后重试';
+    if (url) {
+      mainLink.href = url;
+      mainLink.textContent = '📖 尝试直接访问';
+    }
+    actions.classList.remove('hidden');
+  }
+
+  // Method 1: Fetch tunnel_url.txt with cache-busting
+  fetch('tunnel_url.txt?_t=' + Date.now() + '&_r=' + Math.random(), { cache: 'no-store' })
     .then(function(r) {
-      if (!r.ok) throw new Error('无法获取地址');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.text();
     })
-    .then(function(url) {
-      url = url.trim();
-      if (!url || !url.startsWith('https://')) {
-        throw new Error('地址格式不正确');
-      }
-      // Verify the tunnel is reachable before redirecting
-      statusEl.textContent = '正在跳转...';
-      window.location.href = url + '/index.html';
-      // Fallback: if redirect doesn't happen in 5s, show manual link
-      setTimeout(function() {
-        showError('自动跳转未成功，请点击下方按钮', url + '/index.html');
-      }, 5000);
+    .then(function(text) {
+      var url = text.trim();
+      if (!url || !url.startsWith('https://')) throw new Error('Invalid URL');
+      tunnelUrl = url;
+      showReady(url + '/index.html');
     })
-    .catch(function(err) {
-      // tunnel_url.txt not available, try GitHub Pages fallback
-      showError('连接故事服务器失败，请稍后再试');
+    .catch(function() {
+      // Method 2: Try hardcoded known tunnel URLs from recent sessions
+      // Read from a JSON list of recent URLs
+      fetch('recent_tunnels.json?_t=' + Date.now(), { cache: 'no-store' })
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function(data) {
+          if (data && data.urls && data.urls.length > 0) {
+            tunnelUrl = data.urls[data.urls.length - 1];
+            showReady(tunnelUrl + '/index.html');
+          } else {
+            throw new Error('No URLs');
+          }
+        })
+        .catch(function() {
+          showError('暂时无法连接故事服务器，请稍后刷新重试');
+        });
     });
-
-  // Also try GitHub Pages direct content as fallback after 8 seconds
-  setTimeout(function() {
-    if (!window.location.href.includes('trycloudflare')) {
-      // Still on redirect page, try direct access
-      var directUrl = 'https://loveczycsy.github.io/story-book/stories.html';
-    }
-  }, 8000);
 })();
 </script>
 </body>
