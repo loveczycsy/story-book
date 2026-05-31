@@ -1,0 +1,10 @@
+{
+  "name": "历史绘本故事集",
+  "short_name": "绘本故事",
+  "description": "为好奇的小朋友准备的历史故事",
+  "start_url": "/story-book/",
+  "display": "standalone",
+  "background_color": "#0f0e17",
+  "theme_color": "#e94560",
+  "icons": []
+}
