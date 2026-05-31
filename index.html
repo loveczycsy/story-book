@@ -52,6 +52,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .moral-title{font-size:.85rem;font-weight:600;color:var(--accent);margin-bottom:6px}
 .moral-text{font-size:.9rem;line-height:1.6;color:var(--text)}
 .hidden{display:none!important}
+
+@media(min-width:768px){
+.container{max-width:900px;padding:16px 24px 80px}
+.stories-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.grid-view .story-card .card-content{padding:10px 12px 12px}
+.grid-view .story-card .card-title{font-size:.9rem}
+.story-header{padding:0 24px 16px}
+.story-paragraph{padding:0 24px;font-size:1rem;line-height:2}
+.moral-card{margin:16px 24px;padding:20px}
+}
+@media(min-width:1024px){
+.container{max-width:960px;padding:20px 32px 80px}
+.stories-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+.story-header{padding:0 32px 16px}
+.story-paragraph{padding:0 32px}
+.moral-card{margin:16px 32px}
+/* Story detail: image+paragraph side by side on desktop */
+.story-img{max-width:360px;float:right;margin:8px 0 8px 20px;border-radius:10px}
+.story-header::after{content:'';display:table;clear:both}
+#storyContent::after{content:'';display:table;clear:both}
+}
 </style>
 </head>
 <body>
