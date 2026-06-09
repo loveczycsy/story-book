@@ -103,12 +103,12 @@ function renderHome(){
     h+='<div class="date-section"><div class="date-header"><span class="date-dot"></span>'+formatDate(d)+'<span class="date-count">('+items.length+'则)</span></div>';
     if(currentView==='grid'){
       h+='<div class="stories-grid grid-view">';
-      for(const i of items){const t=i.s,k=i.imgKey||t,src=getImgPath(k,0);
+      for(const i of items){const t=i.t,k=i.k,src=getImgPath(k,0);
         h+='<div class="story-card" onclick="showStory(\''+t.replace(/'/g,"\\'")+'\')"><img class="card-img" src="'+src+'" alt="'+t+'" loading="lazy" onerror="this.style.background=\'var(--primary-light)\'"><div class="card-content"><h3 class="card-title">'+t+'</h3><div class="card-meta"><span>'+i.e+'</span><span class="card-tag">'+i.c+'</span></div></div></div>'}
       h+='</div>';
     }else{
       h+='<div class="stories-list list-view">';
-      for(const i of items){const t=i.s,k=i.imgKey||t,src=getImgPath(k,0);
+      for(const i of items){const t=i.t,k=i.k,src=getImgPath(k,0);
         h+='<div class="story-card" onclick="showStory(\''+t.replace(/'/g,"\\'")+'\')"><img class="card-img" src="'+src+'" alt="'+t+'" loading="lazy" onerror="this.style.background=\'var(--primary-light)\'"><div class="card-content"><div class="card-title">'+t+'</div><div class="card-meta"><span>'+i.e+'</span><span class="card-tag">'+i.c+'</span></div></div></div>'}
       h+='</div>';
     }
@@ -123,8 +123,8 @@ function renderHome(){
 }
 function loadMore(){displayCount+=PAGE_SIZE;renderHome();}
 function showStory(title){
-  const item=D.find(d=>d.s===title);if(!item)return;
-  const ps=P[title]||[];const k=item.imgKey||title;
+  const item=D.find(d=>d.t===title);if(!item)return;
+  const ps=P[item.k]||[];const k=item.k;
   let h='<div class="story-header"><h1 class="story-title">'+title+'</h1><p class="story-era">'+item.e+'</p></div>';
   for(let i=0;i<ps.length;i++){
     h+='<img class="story-img" src="'+getImgPath(k,i)+'" alt="插图'+(i+1)+'" loading="lazy" onerror="this.style.display=\'none\'">';
